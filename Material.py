@@ -30,7 +30,7 @@ class UnlitMaterial (Material):
 
     def shade(self, view_dir, normal, lights, hit_pos, recursion, uv, eta):
         if isinstance(self.albedo, Texture):
-            return self.albedo.sample(uv[0], uv[1]) * color
+            return self.albedo.sample(uv[0], uv[1]) * self.color
         return self.color
 
 
@@ -246,8 +246,6 @@ class ReflectiveMaterial(Material):
 
 
 class TransparentMaterial (Material):
-    eta = 0
-    transparency = 0
 
     def __init__(self, eta, transparency, sample_skybox, calculate_internal_refraction, F0=0.08):
         self.eta = eta
@@ -268,19 +266,19 @@ class TransparentMaterial (Material):
         if self.sample_skybox:
             refraction_color = scene.skyBox.sample(refraction_direction)
         else:
-            if recursion < 8:
+            if recursion < Material.scene.camera.trace_stack[0].max_recursion:
                 if eta < self.eta:
                     refraction_color = Raytracing.trace(Ray(hit_pos - normal * 0.05, refraction_direction),
-                                                        Raytracing.Trace(0, True, 0, 8), recursion + 1, self.eta)
+                                                        Material.scene.camera.trace_stack, recursion + 1, self.eta)
                 else:
                     refraction_color = Raytracing.trace(Ray(hit_pos + normal * 0.05, refraction_direction),
-                                                        Raytracing.Trace(0, True, 0, 8), recursion + 1, self.eta)
+                                                        Material.scene.camera.trace_stack, recursion + 1, self.eta)
             else:
-                return scene.skyBox.sample(refraction_direction)
+                return Material.scene.skyBox.sample(refraction_direction)
         if eta < self.eta and self.sample_skybox:
             reflection_color = scene.skyBox.sample(view_dir.reflect(normal))
         elif eta < self.eta and not self.sample_skybox and recursion < 8:
-            reflection_color = Raytracing.trace(Ray(hit_pos, view_dir.reflect(normal)), Raytracing.Trace(0, True, 0, 8), recursion + 1)
+            reflection_color = Raytracing.trace(Ray(hit_pos, view_dir.reflect(normal)), Material.scene.camera.trace_stack, recursion + 1)
         else:
             return refraction_color
 

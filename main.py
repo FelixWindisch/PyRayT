@@ -29,7 +29,7 @@ def render(scene):
     stop_watch.stop()
 
 # Pick the scene to render
-render(Example.Implicit_Geometry)
+render(Example.caustics)
 # Pick the scene to render
 
 running = True

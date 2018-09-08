@@ -3,6 +3,7 @@ from Ray import Ray
 import math
 from Light import*
 import Sample
+from Objects import Sphere
 import lighting
 
 scene = None
@@ -38,7 +39,9 @@ def trace(ray, trace_stack, recursion, eta=1):
                         sample_ray = Ray(hit + 0.05 * hit_n, (sample-hit).normalize())
                         l_hit, l_hit_n, l_hit_object, l_hit_distance, l_uv = trace_nearest(sample_ray)
                         if l_hit_object == l.surface:
-                            affected_lights.append(Light(-(l_hit-sample).normalize(), l.color, l.intensity / trace_stack[0].area_light_samples))
+                            light = OmniLight(sample, l.color, l.intensity / trace_stack[0].area_light_samples * 10)
+                            light.direction = (l_hit - sample).normalize()
+                            affected_lights.append(light)
                         s_hit = 5
             if s_hit is None:
                 affected_lights.append(l)

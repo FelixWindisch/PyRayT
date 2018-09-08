@@ -70,7 +70,7 @@ class Sphere(Object):
 
 class Plane(Object):
 
-    def __init__(self, position, normal, material, tiling = 10):
+    def __init__(self, position, normal, material, tiling=10):
         self.position = position
         self.normal = normal.normalize()
         self.material = material
